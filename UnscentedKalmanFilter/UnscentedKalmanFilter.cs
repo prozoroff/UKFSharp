@@ -89,11 +89,11 @@ namespace UnscentedKalmanFilter
         /// <param name="Q">process noise covariance </param>
         /// <param name="R">measurement noise covariance </param>
         /// <returns></returns>
-        public Matrix<double>[] Update(IFunction f, Matrix<double>[] x_and_P, IFunction h, Matrix<double> z, Matrix<double> Q, Matrix<double> R) 
+        public Matrix<double>[] Update(IFunction f, Matrix<double> x, Matrix<double> P, IFunction h, Matrix<double> z, Matrix<double> Q, Matrix<double> R) 
 	    {
 
             //sigma points around x
-            Matrix<double> X = GetSigmaPoints(x_and_P[0], x_and_P[1], c);  
+            Matrix<double> X = GetSigmaPoints(x, P, c);  
 
 
             //unscented transformation of process
@@ -118,11 +118,11 @@ namespace UnscentedKalmanFilter
             Matrix<double> K = P12.Multiply(P2.Inverse());
 
             //state update
-            x_and_P[0] = x1.Add(K.Multiply(z.Subtract(z1)));
+            var resultX = x1.Add(K.Multiply(z.Subtract(z1)));
             //covariance update 
-            x_and_P[1] = P1.Subtract(K.Multiply(P12.Transpose()));  
+            var resultP = P1.Subtract(K.Multiply(P12.Transpose()));
 
-	        return x_and_P;
+            return new Matrix<double>[] { resultX, resultP };
 	    }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace UnscentedKalmanFilter
                 y = y.Add(Y.SubMatrix(0, Y.RowCount, k, 1).Multiply(Wm[0,k]));
             }
 
-            Matrix<double> Y1 = Y.Subtract(y.SubMatrix(0,y.RowCount,0,L));
+            Matrix<double> Y1 = Y.Subtract(y.Multiply(Matrix.Build.Dense(1,L,1)));
             Matrix<double> P = Y1.Multiply(Matrix.Build.Diagonal(Wc.Row(0).ToArray()));
             P = P.Multiply(Y1.Transpose());
             P = P.Add(R);
@@ -181,13 +181,13 @@ namespace UnscentedKalmanFilter
 	    	}
 
 	    	Matrix<double> X = Matrix.Build.Dense(n,(2*n+1));
-	    	X.SetSubMatrix(0, n-1, 0, 1, x);
+	    	X.SetSubMatrix(0, n, 0, 1, x);
 
 	    	Matrix<double> Y_plus_A = Y.Add(A);	
-	    	X.SetSubMatrix(0, n-1, 1, n, Y_plus_A);
+	    	X.SetSubMatrix(0, n, 1, n, Y_plus_A);
 	    	
 	    	Matrix<double> Y_minus_A = Y.Subtract(A);
-	    	X.SetSubMatrix(0, n-1, n+1, n, Y_minus_A);
+	    	X.SetSubMatrix(0, n, n+1, n, Y_minus_A);
 	    	
 	    	return X;
 	    }
