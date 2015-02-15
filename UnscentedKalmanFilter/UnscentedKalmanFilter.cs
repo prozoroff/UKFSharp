@@ -18,7 +18,7 @@ namespace UnscentedKalmanFilter
 		private int m;  
 
 		/// <summary>
-		/// The alpha.
+		/// The alpha coefficient, characterize sigma-points dispersion around mean
 		/// </summary>
 		private double alpha;  
 
@@ -28,7 +28,7 @@ namespace UnscentedKalmanFilter
 		private double ki;
 
 		/// <summary>
-		/// The beta.
+        /// The beta coefficient, characterize type of distribution (2 for normal one) 
 		/// </summary>
 		private double beta;
 
