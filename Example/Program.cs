@@ -21,14 +21,14 @@ namespace Example
             var n = 1; //number of state
             var q = 0.1; //std of process 
             var r = 0.1; //std of measurement
-            var Q = Matrix.Build.Diagonal(n, n, 1).Multiply(q * q); //covariance of process
+            var Q = Matrix.Build.Diagonal(n, n, q * q); //covariance of process
             var R = Matrix.Build.Dense(1, 1, r * r); //covariance of measurement  
             var f = new FEquation(); //nonlinear state equations
             var h = new HEquation(); //measurement equation
             var s = Matrix.Build.Dense(1, 1, 0); //initial state
             var x = s + q * Matrix.Build.Random(1, 1); //initial state with noise
             var P = Matrix.Build.Diagonal(n, n, 1); //initial state covraiance
-            var N = 100; //total dynamic steps
+            var N = 10; //total dynamic steps
 
             var xV = Matrix.Build.Dense(n, N, 0); //estmate
             var sV = Matrix.Build.Dense(n, N, 0); //actual
@@ -46,17 +46,17 @@ namespace Example
                 s = f.Process(s).Add(Matrix.Build.Random(1, 1).Multiply(q));     //update process
             }
 
-            GraphPane myPane = new GraphPane(new RectangleF(0, 0, 1600, 1200), "UKF", "number", "measurement");
+            GraphPane myPane = new GraphPane(new RectangleF(0, 0, 3200, 2400), "Unscented Kalman Filter", "number", "measurement");
             PointPairList list_sV = new PointPairList();
             PointPairList list_xV = new PointPairList();
             for (int i = 0; i < sV.ColumnCount; i++)
             {
-                list_sV.Add(i, sV[0, i]);
+                list_sV.Add(i, zV[0, i]);
                 list_xV.Add(i, xV[0, i]);
             }
-            myPane.AddCurve("sV", list_sV, Color.Red, SymbolType.Diamond);
-            myPane.AddCurve("xV", list_xV, Color.Green, SymbolType.XCross);
-            Bitmap bm = new Bitmap(100, 100);
+            myPane.AddCurve("measurement", list_sV, Color.Red, SymbolType.Circle);
+            myPane.AddCurve("estmate", list_xV, Color.Green, SymbolType.XCross);
+            Bitmap bm = new Bitmap(200, 200);
             Graphics g = Graphics.FromImage(bm);
             myPane.AxisChange(g);
             Image im = myPane.Image;
@@ -68,7 +68,7 @@ namespace Example
     {
         public Matrix<double> Process(Matrix<double> x)
         {
-            return Matrix.Build.Dense(1, 1, x[0, 0]);
+            return x;
         }
     }
 
@@ -76,7 +76,7 @@ namespace Example
     {
         public Matrix<double> Process(Matrix<double> x)
         {
-            return Matrix.Build.Dense(1, 1, x[0, 0]);
+            return x;
         }
     }
 }

@@ -74,7 +74,7 @@ namespace UnscentedKalmanFilter
             //weights for covariance
             Wc = Matrix.Build.Dense(1, (2 * L + 1));
             Wm.CopyTo(Wc);
-            Wc[0, 0] = Wc[0, 0] + 1 - alpha * alpha + beta;
+            Wc[0, 0] = Wm[0, 0] + 1 - alpha * alpha + beta;
 
             c = Math.Sqrt(c);	
 		}
@@ -177,7 +177,7 @@ namespace UnscentedKalmanFilter
 	    	Matrix<double> Y = Matrix.Build.Dense(n, n, 1);
 	    	for (int j=0; j<n; j++)  
 	    	{
-	    		Y.SetSubMatrix(0, n-1, j, 1, x);
+	    		Y.SetSubMatrix(0, n, j, 1, x);
 	    	}
 
 	    	Matrix<double> X = Matrix.Build.Dense(n,(2*n+1));
