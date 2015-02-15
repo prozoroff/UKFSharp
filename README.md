@@ -15,7 +15,7 @@ Example of usage for sin(x) model:
   var R = Matrix.Build.Dense(1, 1, r * r); //covariance of measurement  
   var f = new FEquation(); //nonlinear state equations
   var h = new HEquation(); //measurement equation
-  var x = q * Matrix.Build.Random(1, 1);  //s + q * Matrix.Build.Random(1, 1); //initial state with noise
+  var x = q * Matrix.Build.Random(1, 1);  //initial state with noise
   var P = Matrix.Build.Diagonal(n, n, 1); //initial state covraiance
   var N = 100; //total dynamic steps
 
@@ -24,7 +24,8 @@ Example of usage for sin(x) model:
 
   for (int k = 1; k < N; k++)
   {
-    var z = Matrix.Build.Dense(1,1,Math.Sin(k*3.14*5/180)).Add(Matrix.Build.Random(1, 1).Multiply(r)); //measurments
+    var measurement = Math.Sin(k*3.14*5/180); 
+    var z = Matrix.Build.Dense(1,1,measurement).Add(Matrix.Build.Random(1, 1).Multiply(r)); //measurments
     zV.SetSubMatrix(0, k, z);                                        //save measurment
     var x_and_P = filter.Update(f, x, P, h, z, Q, R);                //ukf 
     x = x_and_P[0];
