@@ -1,4 +1,4 @@
-# UKFSharp
+# UKFSharp [![Build Status](https://travis-ci.org/prozoroff/UKFSharp.svg?branch=master)](https://travis-ci.org/prozoroff/UKFSharp)
 Simple C# implementation of Unscented Kalman Filter using Math.Net Numerics library.
 
 The Unscented Kalman Filter (UKF) is a solution to bypass restrictions of highly nonlinear systems. (The well-known Kalman Filter is basically suitable for linear systems.) The idea is to produce several sampling points (Sigma points) around the current state estimate based on its covariance. Then, propagating these points through the nonlinear map to get more accurate estimation of the mean and covariance of the mapping results. In this way, it avoids the need to calculate the Jacobian, hence incurs only the similar computation load as the EKF.
