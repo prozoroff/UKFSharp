@@ -8,30 +8,22 @@ This implementation is a simplified version of UKF formulation, where we assume 
 Example of usage for sin(x) model:
 
 ```
-  var filter = new UKF(1, 1);
-  var q = 0.05; //std of process 
-  var r = 0.3; //std of measurement
-  var Q = Matrix.Build.Diagonal(1, 1, q * q); //covariance of process
-  var R = Matrix.Build.Dense(1, 1, r * r); //covariance of measurement  
-  var f = new FEquation(); //nonlinear state equations
-  var h = new HEquation(); //measurement equation
-  var x = q * Matrix.Build.Random(1, 1);  //initial state with noise
-  var P = Matrix.Build.Diagonal(n, n, 1); //initial state covraiance
-  var N = 100; //total dynamic steps
+var filter = new UKF();
 
-  var xV = Matrix.Build.Dense(n, N, 0); //estmate
-  var zV = Matrix.Build.Dense(1, N, 0); //measurement
+List<double> measurements = new List<double>();
+List<double> estimations = new List<double>();
+     
+Random rnd = new Random();
 
-  for (int k = 1; k < N; k++)
-  {
-    var measurement = Math.Sin(k*3.14*5/180); 
-    var z = Matrix.Build.Dense(1,1,measurement).Add(Matrix.Build.Random(1, 1).Multiply(r)); //measurments
-    zV.SetSubMatrix(0, k, z);                                        //save measurment
-    var x_and_P = filter.Update(f, x, P, h, z, Q, R);                //ukf 
-    x = x_and_P[0];
-    P = x_and_P[1];
-    xV.SetColumn(k, x.Column(0).ToArray());                          //save estimate
-  }
+for (int k = 0; k < 100; k++)
+{
+    var noisySin = Math.Sin(k * 3.14 * 5 / 180) + (double)rnd.Next(50) / 100;
+    var measurement = new[] { noisySin };
+    filter.Update(measurement);
+
+    measurements.Add(measurement);
+    estimations.Add(filter.getState()[0]);
+}
 ```
 
 ![alt tag](https://raw.githubusercontent.com/prozoroff/UKFSharp/master/Data/result.png)
