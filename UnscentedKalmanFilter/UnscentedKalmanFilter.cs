@@ -101,7 +101,7 @@ namespace UnscentedKalmanFilter
             P = Matrix.Build.Diagonal(L, L, 1); //initial state covraiance
 
             Q = Matrix.Build.Diagonal(L, L, q * q); //covariance of process
-            R = Matrix.Build.Dense(m, 1, r * r); //covariance of measurement  
+            R = Matrix.Build.Dense(m, m, r * r); //covariance of measurement  
 
             alpha = 1e-3f;
             ki = 0;
