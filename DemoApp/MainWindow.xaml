@@ -5,14 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DemoApp"
         xmlns:oxy="http://oxyplot.org/wpf"
-                xmlns:dg2d="clr-namespace:DataGrid2DLibrary;assembly=DataGrid2DLibrary"
+                xmlns:dg2d="http://gu.se/DataGrid2D"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
 
     <DockPanel>
-        <Grid DockPanel.Dock="Top" Height="50">
-            <Button Height="30" Width="100" Click="Button_Click" Content="Run"/>
-        </Grid>
         <Grid DockPanel.Dock="Bottom" >
 
 

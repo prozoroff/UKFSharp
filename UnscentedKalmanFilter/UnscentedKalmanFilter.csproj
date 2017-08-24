@@ -36,7 +36,6 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IFunction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnscentedKalmanFilter.cs" />
   </ItemGroup>

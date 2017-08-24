@@ -1,0 +1,8 @@
+UnscentedKalmanFilter/obj/*
+packages/*
+Example/bin/*
+DemoApp/obj/*
+Example/obj/*
+UnscentedKalmanFilter/bin/*
+DemoApp/bin/*
+.vs/*

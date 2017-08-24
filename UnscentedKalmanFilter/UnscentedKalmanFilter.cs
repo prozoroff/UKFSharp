@@ -53,16 +53,58 @@ namespace UnscentedKalmanFilter
         private Matrix<double> Wc;
 
         /// <summary>
+		/// State
+		/// </summary>
+        private Matrix<double> x;
+
+        /// <summary>
+		/// Covariance
+		/// </summary>
+        private Matrix<double> P;
+
+        /// <summary>
+		/// Std of process 
+		/// </summary>
+        private double q;
+
+        /// <summary>
+		/// Std of measurement 
+		/// </summary>
+        private double r;
+
+        /// <summary>
+		/// Covariance of process
+		/// </summary>
+        private Matrix<double> Q;
+
+        /// <summary>
+		/// Covariance of measurement 
+		/// </summary>
+        private Matrix<double> R;
+
+        /// <summary>
         /// Constructor of Unscented Kalman Filter
         /// </summary>
         /// <param name="L">States number</param>
         /// <param name="m">Measurements number</param>
-        public UKF(int L, int m)
+        public UKF(int L = 0)
 		{
             this.L = L;
-            this.m = m;
+		}
+
+        private void init()
+        {
+            q = 0.05;
+            r = 0.3; 
+
+            x = q * Matrix.Build.Random(L, 1); //initial state with noise
+            P = Matrix.Build.Diagonal(L, L, 1); //initial state covraiance
+
+            Q = Matrix.Build.Diagonal(L, L, q * q); //covariance of process
+            R = Matrix.Build.Dense(m, 1, r * r); //covariance of measurement  
+
             alpha = 1e-3f;
-            ki = 0;  
+            ki = 0;
             beta = 2f;
             lambda = alpha * alpha * (L + ki) - L;
             c = L + lambda;
@@ -76,37 +118,39 @@ namespace UnscentedKalmanFilter
             Wm.CopyTo(Wc);
             Wc[0, 0] = Wm[0, 0] + 1 - alpha * alpha + beta;
 
-            c = Math.Sqrt(c);	
-		}
+            c = Math.Sqrt(c);
+        }
 
-        /// <summary>
-        /// Update process
-        /// </summary>
-        /// <param name="f">nonlinear state equations</param>
-        /// <param name="x_and_P">state and covariance</param>
-        /// <param name="h">measurement equation</param>
-        /// <param name="z">current measurement</param>
-        /// <param name="Q">process noise covariance </param>
-        /// <param name="R">measurement noise covariance </param>
-        /// <returns></returns>
-        public Matrix<double>[] Update(IFunction f, Matrix<double> x, Matrix<double> P, IFunction h, Matrix<double> z, Matrix<double> Q, Matrix<double> R) 
-	    {
+        public void Update(double[] measurements)
+        {
+            if (m == 0)
+            {
+                var mNum = measurements.Length;
+                if (mNum > 0)
+                {
+                    m = mNum;
+                    if (L == 0) L = mNum;
+                    init();
+                }
+            }
+
+            var z = Matrix.Build.Dense(m, 1, 0);
+            z.SetColumn(0, measurements);
 
             //sigma points around x
-            Matrix<double> X = GetSigmaPoints(x, P, c);  
-
+            Matrix<double> X = GetSigmaPoints(x, P, c);
 
             //unscented transformation of process
             // X1=sigmas(x1,P1,c) - sigma points around x1
             //X2=X1-x1(:,ones(1,size(X1,2))) - deviation of X1
-            Matrix<double>[] ut_f_matrices = UnscentedTransform(f, X, Wm, Wc, L, Q);  
+            Matrix<double>[] ut_f_matrices = UnscentedTransform(X, Wm, Wc, L, Q);
             Matrix<double> x1 = ut_f_matrices[0];
             Matrix<double> X1 = ut_f_matrices[1];
             Matrix<double> P1 = ut_f_matrices[2];
             Matrix<double> X2 = ut_f_matrices[3];
 
             //unscented transformation of measurments
-            Matrix<double>[] ut_h_matrices = UnscentedTransform(h, X1, Wm, Wc, m, R);  
+            Matrix<double>[] ut_h_matrices = UnscentedTransform(X1, Wm, Wc, m, R);
             Matrix<double> z1 = ut_h_matrices[0];
             Matrix<double> Z1 = ut_h_matrices[1];
             Matrix<double> P2 = ut_h_matrices[2];
@@ -118,12 +162,20 @@ namespace UnscentedKalmanFilter
             Matrix<double> K = P12.Multiply(P2.Inverse());
 
             //state update
-            var resultX = x1.Add(K.Multiply(z.Subtract(z1)));
+            x = x1.Add(K.Multiply(z.Subtract(z1)));
             //covariance update 
-            var resultP = P1.Subtract(K.Multiply(P12.Transpose()));
+            P = P1.Subtract(K.Multiply(P12.Transpose()));
+        }
 
-            return new Matrix<double>[] { resultX, resultP };
-	    }
+        public double[] getState()
+        {
+            return x.ToColumnArrays()[0];
+        }
+
+        public double[,] getCovariance()
+        {
+            return P.ToArray();
+        }
 
         /// <summary>
         /// Unscented Transformation
@@ -135,7 +187,7 @@ namespace UnscentedKalmanFilter
         /// <param name="n">numer of outputs of f</param>
         /// <param name="R">additive covariance</param>
         /// <returns>[transformed mean, transformed smapling points, transformed covariance, transformed deviations</returns>
-        private Matrix<double>[] UnscentedTransform(IFunction f, Matrix<double> X, Matrix<double> Wm, Matrix<double> Wc, int n, Matrix<double> R)
+        private Matrix<double>[] UnscentedTransform(Matrix<double> X, Matrix<double> Wm, Matrix<double> Wc, int n, Matrix<double> R)
         {
             int L = X.ColumnCount;
             Matrix<double> y = Matrix.Build.Dense(n, 1, 0);
@@ -145,7 +197,7 @@ namespace UnscentedKalmanFilter
             for (int k = 0; k < L; k++)
             {
                 row_in_X = X.SubMatrix(0, X.RowCount, k, 1);
-                Y.SetSubMatrix(0, Y.RowCount, k, 1, f.Process(row_in_X));
+                Y.SetSubMatrix(0, Y.RowCount, k, 1, row_in_X);
                 y = y.Add(Y.SubMatrix(0, Y.RowCount, k, 1).Multiply(Wm[0,k]));
             }
 

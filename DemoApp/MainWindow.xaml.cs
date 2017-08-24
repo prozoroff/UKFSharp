@@ -26,10 +26,5 @@ namespace DemoApp
             var x = new MainWindowViewModel();
             this.DataContext = x;
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            (this.DataContext as MainWindowViewModel).Run();
-        }
     }
 }

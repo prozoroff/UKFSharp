@@ -1,11 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Windows;
 using System.Collections.ObjectModel;
 using UnscentedKalmanFilter;
-using MathNet.Numerics.LinearAlgebra.Double;
-using MathNet.Numerics.LinearAlgebra;
 
 namespace DemoApp
 {
@@ -16,100 +11,36 @@ namespace DemoApp
         public ObservableCollection<Measurement> Estimates { get; set; }
 
 
-
-        public Matrix<double> Q { get; set; }
-        public Matrix<double> R { get; set; }
-        public FEquation f { get; set; }
-        public HEquation h { get; set; }
-        public Matrix<double> x { get; set; }
-        public Matrix<double> P { get; set; }
-
-
-        private int n; //number of state
-        private double q; //std of process 
-        private double r; //std of measurement
-        private int N;//total dynamic steps
-
         public MainWindowViewModel()
         {
             Measurements = new ObservableCollection<Measurement>();
             Estimates = new ObservableCollection<Measurement>();
-        }
 
-
-        public void Run()
-        {
-            var filter = new UKF(1, 1);
-
-            n = 1;
-            q = 0.05;
-            r = 0.3;
-            N = 100;
-
-            Q = Matrix.Build.Diagonal(n, n, q * q); //covariance of process
-            NotifyChanged("Q");
-            R = Matrix.Build.Dense(1, 1, r * r); //covariance of measurement  
-            f = new FEquation(); //nonlinear state equations
-            h = new HEquation(); //measurement equation
-            x = q * Matrix.Build.Random(1, 1);  //s + q * Matrix.Build.Random(1, 1); //initial state with noise
-            P = Matrix.Build.Diagonal(n, n, 1); //initial state covariance
-
-
-            var xV = Matrix.Build.Dense(n, N, 0); //Estimate
-            var zV = Matrix.Build.Dense(1, N, 0); //measurement
-
+            var filter = new UKF();
+            var N = 100;
 
             for (int k = 1; k < N; k++)
             {
-                Matrix<double> z = ProcessBuilder.SineWave(k, r);
-                //measurments
-           
-                Matrix<double>[] x_and_P = filter.Update(f, x, P, h, z, Q, R);                //ukf 
-                x = x_and_P[0];
-                P = x_and_P[1];
-               
-                Measurements.Add(new Measurement() { Value = z[0, 0], Time = TimeSpan.FromSeconds(k) });
-                Estimates.Add(new Measurement() { Value = x_and_P[0][0, 0], Time = TimeSpan.FromSeconds(k) ,Variance= x_and_P[1][0, 0] });
+                double[] z = ProcessBuilder.SineWave(k);
+                filter.Update(z);
+                var state = filter.getState();
+                var covariance = filter.getCovariance();
+
+                Measurements.Add(new Measurement() { Value = z[0], Time = TimeSpan.FromSeconds(k) });
+                Estimates.Add(new Measurement() { Value = state[0], Time = TimeSpan.FromSeconds(k), Variance = covariance[0, 0] });
             }
-
-
-
-  
-
         }
     }
-
-    public class FEquation : IFunction
-    {
-        public Matrix<double> Process(Matrix<double> x)
-        {
-            return x;
-        }
-    }
-
-    public class HEquation : IFunction
-    {
-        public Matrix<double> Process(Matrix<double> x)
-        {
-            return x;
-        }
-    }
-
 
     public static class ProcessBuilder
     {
-        public static Matrix<double> SineWave(int iteration, double Noise)
+        private static Random rnd = new Random();
+
+        public static double[] SineWave(int iteration)
         {
-            return Matrix.Build.Dense(1, 1, Math.Sin(iteration * 3.14 * 5 / 180)).Add(Matrix.Build.Random(1, 1).Multiply(Noise));
-
-
+            return new[] { Math.Sin(iteration * 3.14 * 5 / 180) + (double)rnd.Next(50) / 100 };
         }
-
-
-
-
     }
-
 
     public struct Measurement
     {
@@ -131,8 +62,6 @@ namespace DemoApp
         public double UpperDeviation { get;private set; }
         public double LowerDeviation{ get; private set; }
     }
-
-
 }
 
 
