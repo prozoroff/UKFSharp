@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnscentedKalmanFilter", "Un
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Example\Example.csproj", "{18445F38-685F-4A9C-BB11-4BB6B18AF296}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp", "DemoApp\DemoApp.csproj", "{4511AC7F-5C7C-4102-B9AB-7A67B472AD3C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{18445F38-685F-4A9C-BB11-4BB6B18AF296}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18445F38-685F-4A9C-BB11-4BB6B18AF296}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18445F38-685F-4A9C-BB11-4BB6B18AF296}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4511AC7F-5C7C-4102-B9AB-7A67B472AD3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4511AC7F-5C7C-4102-B9AB-7A67B472AD3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4511AC7F-5C7C-4102-B9AB-7A67B472AD3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4511AC7F-5C7C-4102-B9AB-7A67B472AD3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
